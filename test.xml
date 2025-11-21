@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<MenuBar>
+    <!-- File 菜单 -->
+    <Menu i18n="@menu/File" objName="">
+        <Action i18n="@menu/Save" objName=""/>
+        <Action i18n="@menu/Close MRA" objName=""/>
+    </Menu>
+</MenuBar>
