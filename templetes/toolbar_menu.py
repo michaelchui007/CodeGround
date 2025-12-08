@@ -1,4 +1,6 @@
 import sys
+from typing import Tuple
+
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QToolBar, QToolButton,
     QMenu, QWidgetAction, QWidget, QHBoxLayout,
@@ -42,7 +44,12 @@ class FilterItemWidget(QWidget):
             if self.checkbox.isChecked():
                 self.filter_changed.emit()
 
-    def get_filter_data(self):
+    def get_filter_data(self) -> Tuple[str, bool, str]:
+        """
+        获取筛选数据
+        Returns:
+            key, 是否选中， 选中文本
+        """
         return self.key, self.checkbox.isChecked(), self.combo.currentText()
 
 
