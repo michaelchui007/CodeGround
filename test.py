@@ -1,5 +1,11 @@
-from collections import defaultdict
+import ast
 
 if __name__ == '__main__':
-    dd = defaultdict()
-    print(dd["a"])
+    test_dict1 = {
+        "a": 1,
+        "b": 2,
+        "c": 3
+    }
+    test_dict2 = {
+        "d": 4
+    }
