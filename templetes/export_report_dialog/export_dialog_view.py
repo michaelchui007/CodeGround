@@ -1,10 +1,12 @@
 import os
 import sys
 
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QDialog, QApplication, QAbstractItemView, QListWidget, QListWidgetItem, \
     QFileDialog, QMessageBox
 from PySide6.QtCore import Qt
+from dateutil.utils import default_tzinfo
+from requests.packages import target
 
 from templetes.export_report_dialog.export_dialog import Ui_ExportDialog
 
@@ -12,16 +14,24 @@ from templetes.export_report_dialog.export_dialog import Ui_ExportDialog
 class ExportReportView(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.base_name = "123"
         self.ui = Ui_ExportDialog()
         self.ui.setupUi(self)
         self.all_columns = [f"选项{i}" for i in range(1, 20)]
 
         # 2. 定义默认已经在右边的列
         self.default_selected = []
+        self.fmt_config = {
+            "Html":  ("Html Files (*.html)", "html"),
+            "PDF":   ("PDF Files (*.pdf)",   "pdf"),
+            "Excel": ("Excel Files (*.xlsx *.xls)", "xlsx"),
+            "CSV":   ("CSV Files (*.csv)",    "csv")
+        }
 
         self.init_ui_setup()
         self.init_data()
         self.init_connections()
+
 
 
     # ... (init_ui_setup 代码保持不变，此处省略) ...
@@ -117,18 +127,44 @@ class ExportReportView(QDialog):
         """
         方式变更：从静态方法 getOpenFileName -> 实例化 QFileDialog
         """
+        current_path = self.ui.le_template.text().strip()
+        init_dir = os.getcwd()
+        # 如果输入框里有路径，且该文件或文件夹真实存在
+        if current_path and os.path.exists(current_path):
+            if os.path.isfile(current_path):
+                # 如果是文件，取其父目录
+                init_dir = os.path.dirname(current_path)
+            else:
+                # 如果本身就是目录
+                init_dir = current_path
+        elif current_path and os.path.exists(os.path.dirname(current_path)):
+            # 如果文件不存在但目录存在 (比如输错文件名)
+            init_dir = os.path.dirname(current_path)
+
+
+        current_fmt = self.ui.combo_format.currentText()
+        target_filter, default_ext = self.fmt_config.get(current_fmt,
+                                                           "Common Files ("
+                                                          "*.xlsx *.docx *.html)")
+        final_filter = f"{target_filter};;All Files (*)"
+
+
         # 1. 实例化对象
-        file_dialog = QFileDialog(self, "选择模板文件", os.getcwd())
+        file_dialog = QFileDialog(self, "选择模板文件", init_dir)
 
         # 2. 【核心】设置图标 (使用 QRC 路径)
         # 这一步在静态方法里是做不到的
-        file_dialog.setWindowIcon(QIcon(":/assets/logo.png"))
+        file_dialog.setWindowIcon(QPixmap(":/assets/logo.png"))
 
         # 3. 设置过滤器
-        file_dialog.setNameFilter("Excel Files (*.xlsx *.xls);;Word Files (*.docx);;All Files (*)")
+        file_dialog.setNameFilter(final_filter)
+        file_dialog.selectNameFilter(default_ext)
 
         # 4. 设置模式 (比如只选文件，不选文件夹)
         file_dialog.setFileMode(QFileDialog.ExistingFile)
+        # 设置选中文件
+        if current_path and os.path.isfile(current_path):
+            file_dialog.selectFile(os.path.basename(current_path))
 
         # 5. 显示并判断返回值
         # exec() 返回 1 表示用户点了打开，0 表示取消
@@ -142,46 +178,70 @@ class ExportReportView(QDialog):
     def on_browse_save_path(self):
         """
         场景 B: 保存路径
-        新增功能：默认预填自定义文件名
+        修复: 解决后缀名重复叠加 (.pdf.pdf) 的 Bug
         """
-        # 1. 获取格式配置 (保持之前的 Strategy Pattern)
-        current_fmt = self.ui.combo_format.currentText()
-        fmt_config = {
-            "Html":  ("Html Files (*.html)", "html"),
-            "PDF":   ("PDF Files (*.pdf)",   "pdf"),
-            "Excel": ("Excel Files (*.xlsx)", "xlsx"),
-            "CSV":   ("CSV Files (*.csv)",    "csv")
-        }
-        target_filter, default_ext = fmt_config.get(current_fmt, ("All Files (*)", ""))
+        import os
 
-        # ==========================================
-        # 2. 【新增】定义您的自定义文件名
-        # ==========================================
-        # 这里您可以写死，也可以从界面上的 Project Name 输入框获取
+        # 1. --- 准备初始目录 (Init Dir) ---
+        # 逻辑优先级:
+        # 1. 如果当前【保存路径】输入框里有有效目录，就用它 (最符合直觉，要在上次保存的地方继续)
+        # 2. 否则，如果【模板路径】有效，就用模板的目录 (方便)
+        # 3. 实在没有，就用桌面或当前目录
+
+        current_save_path = self.ui.le_save_path.text().strip()
+
+        init_dir = os.path.join(os.path.expanduser("~"), "Desktop") # 默认兜底：桌面
+
+        # 尝试从当前保存路径获取目录
+        if current_save_path:
+            dir_part = os.path.dirname(current_save_path)
+            if dir_part and os.path.exists(dir_part):
+                init_dir = dir_part
+
+
+        # 2. --- 准备默认文件名 (Filename) ---
+        # 获取当前格式对应的后缀，例如 "pdf"
+        current_fmt = self.ui.combo_format.currentText()
+        target_filter, default_ext = self.fmt_config.get(current_fmt, ("All Files (*)", ""))
+
+        # 确定基础文件名
         base_name = "Analysis_Report_v1"
 
-        input_name = self.ui.le_save_path.text() or base_name
+        # 如果输入框里有内容，提取文件名部分 (去掉路径，只要文件名)
+        if current_save_path:
+            # os.path.basename("C:/Docs/report.pdf") -> "report.pdf"
+            input_filename = os.path.basename(current_save_path)
+        else:
+            input_filename = base_name
 
-        # 拼接后缀 (e.g., "Analysis_Report_v1.html")
-        default_filename = f"{input_name}.{default_ext}" if default_ext else input_name
+        # 【核心修复逻辑】：防止后缀叠加
+        # 只有当 input_filename 不以 default_ext 结尾时，才拼接后缀
+        if default_ext:
+            # lower() 是为了忽略大小写，防止 .PDF 和 .pdf 不匹配
+            if not input_filename.lower().endswith(f".{default_ext.lower()}"):
+                final_filename = f"{input_filename}.{default_ext}"
+            else:
+                final_filename = input_filename
+        else:
+            final_filename = input_filename
 
-        # 3. 实例化 Dialog
-        file_dialog = QFileDialog(self, "保存分析报告", os.getcwd())
+        # 3. --- 实例化 Dialog ---
+        file_dialog = QFileDialog(self, "保存分析报告", init_dir) # 这里传入计算好的目录
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog.setWindowIcon(QIcon(":/assets/logo.png"))
 
-        # 4. 应用配置
+        # 4. --- 应用配置 ---
         file_dialog.setNameFilters([target_filter, "All Files (*)"])
         file_dialog.selectNameFilter(target_filter)
 
         if default_ext:
             file_dialog.setDefaultSuffix(default_ext)
 
-        # 5. 【关键一步】设置默认文件名
-        # selectFile 会把字符串填入对话框底部的 "文件名" 输入框中
-        file_dialog.selectFile(default_filename)
+        # 5. --- 填入文件名 ---
+        # 这里只填文件名，不要带路径，因为路径已经在第3步 init_dir 设置了
+        file_dialog.selectFile(final_filename)
 
-        # 6. 显示并处理
+        # 6. --- 显示并处理 ---
         if file_dialog.exec():
             selected_files = file_dialog.selectedFiles()
             if selected_files:
