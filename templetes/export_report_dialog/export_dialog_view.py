@@ -5,8 +5,6 @@ from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QDialog, QApplication, QAbstractItemView, QListWidget, QListWidgetItem, \
     QFileDialog, QMessageBox
 from PySide6.QtCore import Qt
-from dateutil.utils import default_tzinfo
-from requests.packages import target
 
 from templetes.export_report_dialog.export_dialog import Ui_ExportDialog
 
