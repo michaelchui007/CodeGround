@@ -159,7 +159,7 @@ class ExportReportView(QDialog):
         file_dialog.selectNameFilter(default_ext)
 
         # 4. 设置模式 (比如只选文件，不选文件夹)
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         # 设置选中文件
         if current_path and os.path.isfile(current_path):
             file_dialog.selectFile(os.path.basename(current_path))
@@ -176,75 +176,41 @@ class ExportReportView(QDialog):
     def on_browse_save_path(self):
         """
         场景 B: 保存路径
-        修复: 解决后缀名重复叠加 (.pdf.pdf) 的 Bug
+        修改: 由【选择文件】改为【仅选择文件夹】
         """
-        import os
-
         # 1. --- 准备初始目录 (Init Dir) ---
-        # 逻辑优先级:
-        # 1. 如果当前【保存路径】输入框里有有效目录，就用它 (最符合直觉，要在上次保存的地方继续)
-        # 2. 否则，如果【模板路径】有效，就用模板的目录 (方便)
-        # 3. 实在没有，就用桌面或当前目录
+        # 逻辑: 智能判断当前输入框里的路径，让用户从上次的地方开始选
+        current_path = self.ui.le_save_path.text().strip()
 
-        current_save_path = self.ui.le_save_path.text().strip()
+        # 默认兜底：桌面
+        init_dir = os.path.join(os.path.expanduser("~"), "Desktop")
 
-        init_dir = os.path.join(os.path.expanduser("~"), "Desktop") # 默认兜底：桌面
-
-        # 尝试从当前保存路径获取目录
-        if current_save_path:
-            dir_part = os.path.dirname(current_save_path)
-            if dir_part and os.path.exists(dir_part):
-                init_dir = dir_part
-
-
-        # 2. --- 准备默认文件名 (Filename) ---
-        # 获取当前格式对应的后缀，例如 "pdf"
-        current_fmt = self.ui.combo_format.currentText()
-        target_filter, default_ext = self.fmt_config.get(current_fmt, ("All Files (*)", ""))
-
-        # 确定基础文件名
-        base_name = "Analysis_Report_v1"
-
-        # 如果输入框里有内容，提取文件名部分 (去掉路径，只要文件名)
-        if current_save_path:
-            # os.path.basename("C:/Docs/report.pdf") -> "report.pdf"
-            input_filename = os.path.basename(current_save_path)
-        else:
-            input_filename = base_name
-
-        # 【核心修复逻辑】：防止后缀叠加
-        # 只有当 input_filename 不以 default_ext 结尾时，才拼接后缀
-        if default_ext:
-            # lower() 是为了忽略大小写，防止 .PDF 和 .pdf 不匹配
-            if not input_filename.lower().endswith(f".{default_ext.lower()}"):
-                final_filename = f"{input_filename}.{default_ext}"
+        if current_path:
+            # 情况A: 输入框里已经是存在的文件夹 -> 直接用
+            if os.path.isdir(current_path):
+                init_dir = current_path
             else:
-                final_filename = input_filename
-        else:
-            final_filename = input_filename
+                # 情况B: 输入框里是文件路径 (例如 C:/Reports/report.pdf) -> 取父目录
+                dir_part = os.path.dirname(current_path)
+                if dir_part and os.path.exists(dir_part):
+                    init_dir = dir_part
 
-        # 3. --- 实例化 Dialog ---
-        file_dialog = QFileDialog(self, "保存分析报告", init_dir) # 这里传入计算好的目录
-        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
-        file_dialog.setWindowIcon(QIcon(":/assets/logo.png"))
+        # 2. --- 核心修改：使用 getExistingDirectory ---
+        # 这是一个静态方法，专门用于选择文件夹，不处理文件名
+        selected_dir = QFileDialog.getExistingDirectory(
+            self,
+            "选择保存文件夹",      # 标题
+            init_dir,            # 初始目录
+            QFileDialog.Option.ShowDirsOnly | QFileDialog.Option.DontResolveSymlinks
+        )
 
-        # 4. --- 应用配置 ---
-        file_dialog.setNameFilters([target_filter, "All Files (*)"])
-        file_dialog.selectNameFilter(target_filter)
+        # 3. --- 回填路径 ---
+        if selected_dir:
+            # 只把文件夹路径填进去 (例如 C:/Users/Admin/Desktop)
+            # 文件名的拼接逻辑请移步到 on_btn_ok_clicked 中处理
+            self.ui.le_save_path.setText(selected_dir)
 
-        if default_ext:
-            file_dialog.setDefaultSuffix(default_ext)
 
-        # 5. --- 填入文件名 ---
-        # 这里只填文件名，不要带路径，因为路径已经在第3步 init_dir 设置了
-        file_dialog.selectFile(final_filename)
-
-        # 6. --- 显示并处理 ---
-        if file_dialog.exec():
-            selected_files = file_dialog.selectedFiles()
-            if selected_files:
-                file_path = selected_files[0]
-                self.ui.le_save_path.setText(file_path)
     # ==========================
     #       修改后的移动逻辑
     # ==========================
