@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>导出测试报告</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .header img {
+            max-width: 200px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        p {
+            line-height: 1.6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="Logo">
+        <h1>2026年度业务报表</h1>
+    </div>
+    
+    <div class="content">
+        <p>您好，</p>
+        <p>这是一份模拟后端生成的 HTML 报表文件。该文件及其引用的静态资源（如图片）都位于同一个目录下，以模拟内网环境的导出结构。</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>指标名称</th>
+                    <th>当前数据</th>
+                    <th>环比增长</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>月度活跃用户 (MAU)</td>
+                    <td>1,245,000</td>
+                    <td>+12.4%</td>
+                </tr>
+                <tr>
+                    <td>系统平均响应时间</td>
+                    <td>120ms</td>
+                    <td>-5.2%</td>
+                </tr>
+                <tr>
+                    <td>服务器在线率</td>
+                    <td>99.99%</td>
+                    <td>0%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
