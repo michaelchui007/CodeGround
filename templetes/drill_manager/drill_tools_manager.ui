@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DrillToolsManagerDialog</class>
+ <widget class="QDialog" name="DrillToolsManagerDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Drill Tools Manager</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QDialog {
+    background-color: #2f2f2f;
+}
+QLabel {
+    color: #f2f2f2;
+}
+QComboBox, QLineEdit {
+    min-height: 30px;
+    background-color: #3a3a3a;
+    color: #f2f2f2;
+    border: 1px solid #6a6a6a;
+    border-radius: 4px;
+    padding: 0 8px;
+}
+QPushButton, QToolButton {
+    min-height: 32px;
+    background-color: #4a4a4a;
+    color: #f2f2f2;
+    border: 1px solid #6a6a6a;
+    border-radius: 6px;
+    padding: 0 16px;
+}
+QPushButton:hover, QToolButton:hover {
+    background-color: #555555;
+}
+QPushButton:pressed, QToolButton:pressed {
+    background-color: #3f3f3f;
+}
+QTableWidget {
+    background-color: #383838;
+    alternate-background-color: #343434;
+    color: #f2f2f2;
+    gridline-color: #666666;
+    border: 1px solid #666666;
+    selection-background-color: #4f6b8a;
+}
+QHeaderView::section {
+    background-color: #4b4b4b;
+    color: #f2f2f2;
+    padding: 6px;
+    border: 1px solid #666666;
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>12</number>
+   </property>
+   <property name="leftMargin">
+    <number>16</number>
+   </property>
+   <property name="topMargin">
+    <number>16</number>
+   </property>
+   <property name="rightMargin">
+    <number>16</number>
+   </property>
+   <property name="bottomMargin">
+    <number>16</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="topBarLayout">
+     <item>
+      <widget class="QLabel" name="layerLabel">
+       <property name="text">
+        <string>Layer:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="layerComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>drill</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="dtmModelLabel">
+       <property name="text">
+        <string>DTM Model:</string>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <property name="indent">
+        <number>15</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="dtmModelComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="topSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="modeToggleCheckBox">
+       <property name="text">
+        <string>Full/Basic</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: white;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="drillTableWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <property name="columnCount">
+      <number>9</number>
+     </property>
+     <property name="rowCount">
+      <number>15</number>
+     </property>
+     <column><property name="text"><string>Sel</string></property></column>
+     <column><property name="text"><string>Tool</string></property></column>
+     <column><property name="text"><string>Count</string></property></column>
+     <column><property name="text"><string>Type</string></property></column>
+     <column><property name="text"><string>Drill Size (Mil)</string></property></column>
+     <column><property name="text"><string>Finish Size (Mil)</string></property></column>
+     <column><property name="text"><string>+Tol (Mil)</string></property></column>
+     <column><property name="text"><string>-Tol (Mil)</string></property></column>
+     <column><property name="text"><string>Drill Des</string></property></column>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="editorBarLayout">
+     <item>
+      <widget class="QComboBox" name="currentToolComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <item><property name="text"><string>T01</string></property></item>
+      </widget>
+     </item>
+     <item><widget class="QToolButton" name="firstToolBtn"><property name="text"><string>|&lt;</string></property></widget></item>
+     <item><widget class="QToolButton" name="prevToolBtn"><property name="text"><string>&lt;</string></property></widget></item>
+     <item><widget class="QToolButton" name="nextToolBtn"><property name="text"><string>&gt;</string></property></widget></item>
+     <item><widget class="QToolButton" name="lastToolBtn"><property name="text"><string>&gt;|</string></property></widget></item>
+     <item>
+      <spacer name="editorSpacer1">
+       <property name="orientation"><enum>Qt::Horizontal</enum></property>
+       <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+       <property name="sizeHint" stdset="0"><size><width>20</width><height>20</height></size></property>
+      </spacer>
+     </item>
+     <item><widget class="QLabel" name="indexLabel"><property name="text"><string>Index:</string></property></widget></item>
+     <item><widget class="QLineEdit" name="indexLineEdit"/></item>
+     <item>
+      <spacer name="editorSpacer2">
+       <property name="orientation"><enum>Qt::Horizontal</enum></property>
+       <property name="sizeHint" stdset="0"><size><width>20</width><height>20</height></size></property>
+      </spacer>
+     </item>
+     <item><widget class="QComboBox" name="ruleModeComboBox"><item><property name="text"><string>Regular</string></property></item></widget></item>
+     <item><widget class="QComboBox" name="unitComboBox"><item><property name="text"><string>mil/mu</string></property></item></widget></item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="footerLayout">
+     <item><widget class="QToolButton" name="helpBtn"><property name="text"><string>?</string></property></widget></item>
+     <item>
+      <spacer name="footerSpacer">
+       <property name="orientation"><enum>Qt::Horizontal</enum></property>
+       <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+      </spacer>
+     </item>
+     <item><widget class="QPushButton" name="applyBtn"><property name="text"><string>Apply</string></property></widget></item>
+     <item><widget class="QPushButton" name="applyAllLayersBtn"><property name="text"><string>Apply All Layers</string></property></widget></item>
+     <item><widget class="QPushButton" name="applyModelBtn"><property name="text"><string>Apply Model</string></property></widget></item>
+     <item><widget class="QPushButton" name="mergeToolsBtn"><property name="text"><string>Merge Tools</string></property></widget></item>
+     <item><widget class="QPushButton" name="closeBtn"><property name="text"><string>Close</string></property></widget></item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

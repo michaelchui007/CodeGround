@@ -1,0 +1,4 @@
+clipboard==0.0.4
+PySide6==6.10.2
+protobuf
+python-dotenv
