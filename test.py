@@ -1,7 +1,9 @@
-import json
-from typing import final
+from enum import Enum
+
 
 if __name__ == '__main__':
-    aa = "-1"
-    if float(aa) < 0 :
-        print("yes")
+    aa = set()
+    aa.add(111)
+    print((list(aa)))
+    aa.clear()
+    print(aa)
